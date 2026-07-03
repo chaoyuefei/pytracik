@@ -99,14 +99,18 @@ elif _system == "Darwin":
                 f"{kdl_prefix}/include",
                 f"{homebrew_prefix}/include/eigen3",
             ],
-            libraries=['nlopt', 'orocos-kdl', 'boost_date_time', 'boost_thread', python_lib],
+            libraries=['nlopt', 'orocos-kdl', 'boost_date_time', 'boost_thread'],
             library_dirs=[
                 f"{homebrew_prefix}/lib",
                 f"{kdl_prefix}/lib",
-                python_library,
             ],
             language="c++",
             extra_compile_args=["-std=c++17", "-stdlib=libc++"],
+            # Do not link libpython on macOS; resolve Python symbols from the
+            # host interpreter at runtime. Linking it makes delocate vendor a
+            # second libpython into the wheel, which crashes on import
+            # (PyInterpreterState_Get: the GIL is released).
+            extra_link_args=["-Wl,-undefined,dynamic_lookup"],
         ),
     ]
     _packages = ['trac_ik']
